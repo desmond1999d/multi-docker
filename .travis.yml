@@ -1,0 +1,20 @@
+language: generic
+sudo: required
+services:
+    - docker
+before_install:
+    - docker build -t desmond1999d/multi-docker-test -f ./client/Dockerfile.dev ./client
+script:
+    - docker run -e CI=true desmond1999d/multi-docker-test npm run test
+after_success:
+    - docker build -t desmond1999d/multi-client ./client
+    - docker build -t desmond1999d/multi-nginx ./nginx
+    - docker build -t desmond1999d/multi-server ./server
+    - docker build -t desmond1999d/multi-worker ./worker
+    # login in to docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    # Push to docker CLI
+    - docker push desmond1999d/multi-client
+    - docker push desmond1999d/multi-nginx
+    - docker push desmond1999d/multi-server
+    - docker push desmond1999d/multi-worker
